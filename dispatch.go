@@ -16,6 +16,8 @@ type Redirect interface {
 
 type Handler func(c context.Context, r *http.Request) (Template, error)
 
+var templates = templateAssets()
+
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := contextForRequest(r)
 	t, err := h(c, r)
@@ -34,7 +36,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := templateAssets().ExecuteTemplate(w, t.Template(), t); err != nil {
+	if err := templates.ExecuteTemplate(w, t.Template(), t); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
