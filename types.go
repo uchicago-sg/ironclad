@@ -59,14 +59,18 @@ func (l Listing) FormattedPrice() string {
 }
 
 func (l Listing) FormattedAge() string {
-	if l.LastUpdated.IsZero() {
+	u := l.LastUpdated
+	if u.IsZero() || u.Year() < 2000 {
 		return "-"
 	} else {
-		d := time.Since(l.LastUpdated)
+		d := time.Since(u)
 		v := "moments ago"
 		if d.Hours() > 3*24 {
-			return fmt.Sprintf("%d %s",
-				l.LastUpdated.Day(), l.LastUpdated.Month())
+			v = fmt.Sprintf("%d %s", u.Day(), u.Month())
+			if u.Year() != time.Now().Year() {
+				v += fmt.Sprintf(" %d", u.Year())
+			}
+			return v
 		} else if d.Hours() > 24 {
 			v = fmt.Sprintf("%.0f day", d.Hours()/24)
 		} else if d.Hours() > 1 {
