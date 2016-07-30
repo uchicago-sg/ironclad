@@ -1,0 +1,56 @@
+{{template "header.html" .Common}}
+<a href="/{{$.Common.URLSuffix}}">back to search</a>
+{{with .Err}}
+  <p class="alert alert-danger">{{.}}</p>
+{{end}}
+{{with .Listing}}
+  {{if $.Edit}}
+    <form method="post">
+      <h2>
+        {{.Title}}
+        {{if .Seeking}}
+          <span class="label label-warning">Buy</span>
+        {{else}}
+          <span class="label label-info">Sell</span>
+        {{end}}
+        <span class="label label-default">{{.Category}}</span>
+      </h2>
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" class="form-control input-lg" name="title"
+          autofocus value="{{.Title}}"
+          placeholder="listing title"/>
+      </div>
+      <div class="form-group">
+        <label for="title">Body:</label>
+        <textarea class="form-control" rows="10" name="body"
+          placeholder="details about this listing">{{.Body}}</textarea>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox"> Check me out
+        </label>
+      </div>
+      <input type="submit" class="btn btn-primary" value="Save Listing"/>
+      <a href="/view/{{.ID}}{{$.Common.URLSuffix}}"
+         class="btn btn-default">Cancel</a>
+    </form>
+  {{else}}
+    <h2>
+      {{.Title}}
+      {{if .Seeking}}
+        <span class="label label-warning">Buy</span>
+      {{else}}
+        <span class="label label-info">Sell</span>
+      {{end}}
+      <span class="label label-default">{{.Category}}</span>
+    </h2>
+    <p>posted by {{.Seller}}</p>
+    <a href="/edit/{{.ID}}{{$.Common.URLSuffix}}"
+       class="btn btn-default">Edit Listing</a>
+    <p style="white-space:pre-wrap">{{.Body}}</p>
+  {{end}}
+{{else}}
+<p class="notice">There is no such listing.</p>
+{{end}}
+{{template "footer.html" .Common}}

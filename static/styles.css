@@ -1,0 +1,19 @@
+.dropdown-menu input {
+    display: block !important;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+    height: 26px;
+    width: 100%;
+    text-align: left;
+    outline: 0 !important;
+}
+
+.dropdown-menu .btn-link:hover {
+    text-decoration: none;
+    background-color: #f5f5f5;
+    color: #262626;
+}
