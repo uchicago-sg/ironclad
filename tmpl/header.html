@@ -45,6 +45,11 @@
       <input type="text" class="form-control" style="width:auto"
          placeholder="enter search terms" name="q" value="{{.Query}}"/>
     </form>
+    {{with .Subject}}
+    <form method="post" action="/logout" style="display:inline-block">
+      <button type="submit" class="btn btn-default">Logout ({{.Name}})</button>
+    </form>
+    {{end}}
   </div>
   {{with .Message}}
   <p class="alert alert-info">{{.}}</p>

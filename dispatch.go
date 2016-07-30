@@ -26,7 +26,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	s := (*Subject)(nil)
 	if cookie, _ := r.Cookie("session"); cookie != nil {
-		s, _ = ParseSubject(cookie.Value) // TODO: possibly log this
+		s, _ = ParseSubject(c, cookie.Value) // TODO: possibly log this
 	}
 
 	// invoke the handler
@@ -41,7 +41,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s = t.Subject()
 	}
 
-	ss, err := s.Serialize()
+	ss, err := s.Serialize(c)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -78,6 +78,7 @@ func New() http.Handler {
 	mux.Handle("/view/", Handler(ViewListing))
 	mux.Handle("/create", Handler(CreateListing))
 	mux.Handle("/login", Handler(LoginPage))
+	mux.Handle("/logout", Handler(LogoutPage))
 	mux.Handle("/static/", http.FileServer(staticAssets()))
 	return mux
 }

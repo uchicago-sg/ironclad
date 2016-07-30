@@ -86,14 +86,14 @@ type Secret struct {
 func sharedSecret(c context.Context) []byte {
 	s := Secret{}
 	k := datastore.NewKey(c, "Secret", "secret", 0, nil)
-	err := datastore.Get(c, k, &e)
+	err := datastore.Get(c, k, &s)
 
 	if err == datastore.ErrNoSuchEntity {
 		s.Value = make([]byte, 32)
-		if _, err := rand.Rand(b); err != nil {
+		if _, err := rand.Read(s.Value); err != nil {
 			panic(err)
 		}
-		if err := datastore.Put(c, k, &e); err != nil {
+		if _, err := datastore.Put(c, k, &s); err != nil {
 			panic(err)
 		}
 	} else if err != nil {
