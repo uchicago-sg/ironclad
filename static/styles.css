@@ -1,4 +1,4 @@
-.dropdown-menu input {
+.dropdown-menu .btn-link {
     display: block !important;
     padding: 3px 20px;
     clear: both;
@@ -16,4 +16,14 @@
     text-decoration: none;
     background-color: #f5f5f5;
     color: #262626;
+}
+
+.dropdown-menu form {
+    margin: 0 5px;
+    white-space: nowrap;
+}
+
+.dropdown-menu form .form-control {
+    display: inline-block;
+    width: 15em;
 }

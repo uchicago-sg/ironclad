@@ -5,18 +5,20 @@ import (
 )
 
 type Common struct {
+	Subject  *Subject
 	Message  string
 	Query    string
 	Category Category
 	Order    SortOrder
 }
 
-func NewCommon(r *http.Request) Common {
+func NewCommon(s *Subject, r *http.Request) Common {
 	return Common{
 		Message:  "",
 		Query:    r.FormValue("q"),
 		Category: ParseCategory(r.FormValue("category")),
 		Order:    ParseSortOrder(r.FormValue("order")),
+		Subject:  s,
 	}
 }
 

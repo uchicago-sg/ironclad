@@ -78,3 +78,27 @@ func templateAssets() *template.Template {
 func init() {
 	http.Handle("/", New())
 }
+
+type Secret struct {
+	Value []byte
+}
+
+func sharedSecret(c context.Context) []byte {
+	s := Secret{}
+	k := datastore.NewKey(c, "Secret", "secret", 0, nil)
+	err := datastore.Get(c, k, &e)
+
+	if err == datastore.ErrNoSuchEntity {
+		s.Value = make([]byte, 32)
+		if _, err := rand.Rand(b); err != nil {
+			panic(err)
+		}
+		if err := datastore.Put(c, k, &e); err != nil {
+			panic(err)
+		}
+	} else if err != nil {
+		panic(err)
+	}
+
+	return s.Value
+}

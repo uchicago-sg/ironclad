@@ -27,7 +27,7 @@ func (e SingleListing) NewURL() string {
 	}
 }
 
-func ViewListing(c context.Context, r *http.Request) (Template, error) {
+func ViewListing(s *Subject, c context.Context, r *http.Request) (Template, error) {
 	listing, err := lookup(c, idFrom(r))
 	if err != nil || listing == nil {
 		return nil, err
@@ -35,11 +35,11 @@ func ViewListing(c context.Context, r *http.Request) (Template, error) {
 
 	return SingleListing{
 		Listing: listing,
-		Common:  NewCommon(r),
+		Common:  NewCommon(s, r),
 	}, nil
 }
 
-func EditListing(c context.Context, r *http.Request) (Template, error) {
+func EditListing(s *Subject, c context.Context, r *http.Request) (Template, error) {
 	listing, err := lookup(c, idFrom(r))
 	if err != nil || listing == nil {
 		return nil, err
@@ -48,7 +48,7 @@ func EditListing(c context.Context, r *http.Request) (Template, error) {
 	resp := SingleListing{
 		Edit:    true,
 		Listing: listing,
-		Common:  NewCommon(r),
+		Common:  NewCommon(s, r),
 	}
 
 	if r.Method == "POST" {
@@ -68,7 +68,7 @@ func EditListing(c context.Context, r *http.Request) (Template, error) {
 	return resp, nil
 }
 
-func CreateListing(c context.Context, r *http.Request) (Template, error) {
+func CreateListing(s *Subject, c context.Context, r *http.Request) (Template, error) {
 	listing := &Listing{
 		Seller:   "bob@uchicago.edu",
 		Category: ParseCategory(r.FormValue("category")),
@@ -83,6 +83,6 @@ func CreateListing(c context.Context, r *http.Request) (Template, error) {
 		Edit:     true,
 		Redirect: true,
 		Listing:  listing,
-		Common:   NewCommon(r),
+		Common:   NewCommon(s, r),
 	}, nil
 }

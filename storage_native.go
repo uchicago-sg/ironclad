@@ -112,3 +112,11 @@ func persist(c context.Context, l *Listing) error {
 func scan(c context.Context) ([]Listing, error) {
 	return memoryStorage.Listings, nil
 }
+
+func sharedSecret() (b []byte) {
+	b = make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return
+}

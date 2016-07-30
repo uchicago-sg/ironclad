@@ -14,29 +14,58 @@ type Redirect interface {
 	NewURL() string
 }
 
-type Handler func(c context.Context, r *http.Request) (Template, error)
+type NewSubject interface {
+	Subject() *Subject
+}
 
-var templates = templateAssets()
+type Handler func(s *Subject, c context.Context, r *http.Request) (Template, error)
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// read environment from the request
 	c := contextForRequest(r)
-	t, err := h(c, r)
+
+	s := (*Subject)(nil)
+	if cookie, _ := r.Cookie("session"); cookie != nil {
+		s, _ = ParseSubject(cookie.Value) // TODO: possibly log this
+	}
+
+	// invoke the handler
+	t, err := h(s, c, r)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
+	// write out new session
+	if t, ok := t.(NewSubject); ok {
+		s = t.Subject()
+	}
+
+	ss, err := s.Serialize()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session",
+		Value: ss,
+	})
+
+	// possibly redirect somewhere else
 	if t, ok := t.(Redirect); ok && t.NewURL() != "" {
 		http.Redirect(w, r, t.NewURL(), 303)
 		return
 	}
 
+	// handle empty responses
 	if t == nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	if err := templates.ExecuteTemplate(w, t.Template(), t); err != nil {
+	// actually render the template
+	if err := templateAssets().ExecuteTemplate(w, t.Template(), t); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -48,6 +77,7 @@ func New() http.Handler {
 	mux.Handle("/edit/", Handler(EditListing))
 	mux.Handle("/view/", Handler(ViewListing))
 	mux.Handle("/create", Handler(CreateListing))
+	mux.Handle("/login", Handler(LoginPage))
 	mux.Handle("/static/", http.FileServer(staticAssets()))
 	return mux
 }

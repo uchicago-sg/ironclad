@@ -63,8 +63,8 @@ func (r SearchResults) NewURL() string {
 	return ""
 }
 
-func SearchListings(c context.Context, r *http.Request) (Template, error) {
-	com := NewCommon(r)
+func SearchListings(s *Subject, c context.Context, r *http.Request) (Template, error) {
+	com := NewCommon(s, r)
 
 	results, cats, err := engine.Search(c, com.Query, com.Category, com.Order)
 	if err != nil {
