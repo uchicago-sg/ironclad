@@ -1,5 +1,7 @@
 # Ironclad: Marketplace in Go
 
+![the monitor, an ironclad](http://f.tqn.com/y/militaryhistory/1/W/f/b/-/-/uss-monitor-large.jpg)
+
 Primarily, Ironclad seeks to add support for:
 
 - **SAML**, meaning that all University affiliates can sign in; and
