@@ -2,6 +2,7 @@ package ironclad
 
 import (
 	"net/http"
+	"strconv"
 )
 
 type Common struct {
@@ -22,7 +23,7 @@ func NewCommon(s *Subject, r *http.Request) Common {
 	}
 }
 
-func (c Common) SuffixWith(query string, category Category, order SortOrder) string {
+func (c Common) SuffixWith(query string, category Category, order SortOrder, offset int) string {
 	if query == "" {
 		query = c.Query
 	}
@@ -35,28 +36,25 @@ func (c Common) SuffixWith(query string, category Category, order SortOrder) str
 
 	r := ""
 	if query != "" {
-		r += "q=" + query
+		r += "&q=" + query
 	}
 	if category != General {
-		if r != "" {
-			r += "&"
-		}
-		r += "category=" + category.ForURL()
+		r += "&category=" + category.ForURL()
 	}
 	if order != AgeNewToOld {
-		if r != "" {
-			r += "&"
-		}
-		r += "order=" + string(order)
+		r += "&order=" + string(order)
+	}
+	if offset != 0 {
+		r += "&offset=" + strconv.FormatInt(int64(offset), 10)
 	}
 	if r != "" {
-		return "?" + r
+		return "?" + r[1:]
 	}
 	return ""
 }
 
 func (c Common) URLSuffix() string {
-	return c.SuffixWith("", Category(0), SortOrder(""))
+	return c.SuffixWith("", Category(0), SortOrder(""), 0)
 }
 
 func (c Common) AllCategories() []Category {

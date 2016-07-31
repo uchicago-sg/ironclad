@@ -72,6 +72,8 @@ func templateAssets() *template.Template {
 	return template.Must(template.New("").Funcs(
 		template.FuncMap{
 			"many": func(n int) []bool { return make([]bool, n) },
+			"add":  func(a, b int) int { return a + b },
+			"sub":  func(a, b int) int { return a - b },
 		}).ParseGlob("tmpl/*.html"))
 }
 

@@ -2,7 +2,7 @@
 <ul class="nav nav-tabs">
 {{range $category, $count := .Categories}}
   <li{{if eq $category $.Common.Category}} class="active"{{end}}>
-  <a href="/{{$.Common.SuffixWith "" $category ""}}">
+  <a href="/{{$.Common.SuffixWith "" $category "" 0}}">
     {{$category}} <span class="badge">{{$count}}</span></a></li>
 {{end}}
 </ul>
@@ -13,25 +13,26 @@
       <th>S/B</th>
       <th>
         {{if eq "-price" .Common.Order}}
-          &#x25B2; <a href="/{{$.Common.SuffixWith "" 0 "price"}}">Price</a>
+          &#x25B2; <a href="/{{$.Common.SuffixWith "" 0 "price" 0}}">Price</a>
         {{else if eq "price" .Common.Order}}
-          &#x25BC; <a href="/{{$.Common.SuffixWith "" 0 "-price"}}">Price</a>
+          &#x25BC; <a href="/{{$.Common.SuffixWith "" 0 "-price" 0}}">Price</a>
         {{else}}
-          <a href="/{{$.Common.SuffixWith "" 0 "-price"}}">Price</a>
+          <a href="/{{$.Common.SuffixWith "" 0 "-price" 0}}">Price</a>
         {{end}}
       </th>
       <th>Title</th>
       <th>Seller</th>
       <th>
         {{if eq "-age" .Common.Order}}
-          &#x25B2; <a href="/{{$.Common.SuffixWith "" 0 "age"}}">Age</a>
+          &#x25B2; <a href="/{{$.Common.SuffixWith "" 0 "age" 0}}">Age</a>
         {{else if eq "age" .Common.Order}}
-          &#x25BC; <a href="/{{$.Common.SuffixWith "" 0 "-age"}}">Age</a>
+          &#x25BC; <a href="/{{$.Common.SuffixWith "" 0 "-age" 0}}">Age</a>
         {{else}}
-          <a href="/{{$.Common.SuffixWith "" 0 "age"}}">Age</a>
+          <a href="/{{$.Common.SuffixWith "" 0 "age" 0}}">Age</a>
         {{end}}
       </th>
     </tr>
+    {{template "_pagination.html" .}}
   </thead>
   {{range .Listings}}
   <tr>
@@ -66,18 +67,21 @@
     {{end}}
   </td></tr>
   {{end}}
-  <tr>
-    <td colspan="5" style="font-size:0.8em;text-align:center">
-      <form method="post" action="/create">
-        Not having any luck?
-        <input type="hidden" name="seeking" value="true"/>
-        <input type="hidden" name="category"
-           value="{{.Common.Category.ForURL}}"/>
-        
-        <button type="submit" class="btn btn-success btn-xs">
-          Create "{{.Common.Category}} Wanted" Listing</button>
-      </form>
-    </td>
-  </tr>
+  <tfoot>
+    {{template "_pagination.html" .}}
+    <tr>
+      <td colspan="5" style="font-size:0.8em;text-align:center">
+        <form method="post" action="/create">
+          Not having any luck?
+          <input type="hidden" name="seeking" value="true"/>
+          <input type="hidden" name="category"
+             value="{{.Common.Category.ForURL}}"/>
+
+          <button type="submit" class="btn btn-success btn-xs">
+            Create "{{.Common.Category}} Wanted" Listing</button>
+        </form>
+      </td>
+    </tr>
+  </tfoot>
 </table>
 {{template "footer.html" .Common}}

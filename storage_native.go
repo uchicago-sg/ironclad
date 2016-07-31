@@ -66,6 +66,8 @@ func templateAssets() *template.Template {
 	return template.Must(template.New("").Funcs(
 		template.FuncMap{
 			"many": func(n int) []bool { return make([]bool, n) },
+			"add":  func(a, b int) int { return a + b },
+			"sub":  func(a, b int) int { return a - b },
 		}).ParseGlob("tmpl/*.html"))
 }
 
@@ -113,7 +115,7 @@ func scan(c context.Context) ([]Listing, error) {
 	return memoryStorage.Listings, nil
 }
 
-func sharedSecret() (b []byte) {
+func sharedSecret(c context.Context) (b []byte) {
 	b = make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		panic(err)

@@ -3,6 +3,7 @@ package ironclad
 import (
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -13,7 +14,13 @@ type Engine struct {
 	sync.Mutex
 }
 
-func (e *Engine) Search(c context.Context, query string, category Category, order SortOrder) ([]Listing, map[Category]int, error) {
+func (e *Engine) Search(
+	c context.Context,
+	query string,
+	category Category,
+	order SortOrder,
+) ([]Listing, map[Category]int, error) {
+
 	e.Lock()
 	defer e.Unlock()
 
@@ -39,6 +46,25 @@ func (e *Engine) Search(c context.Context, query string, category Category, orde
 	return results, categories, nil
 }
 
+func Paginate(listings []Listing, offset int) (prev, off, next int) {
+	off = offset
+	if off >= len(listings) {
+		off = len(listings)
+	}
+	if off < 0 {
+		off = 0
+	}
+	next = off + 100
+	if next >= len(listings) {
+		next = len(listings)
+	}
+	prev = off - 100
+	if prev < 0 {
+		prev = 0
+	}
+	return
+}
+
 func (l Listing) Matches(query string) bool {
 	return strings.Contains(strings.ToLower(l.Title), strings.ToLower(query))
 }
@@ -48,9 +74,12 @@ func (l Listing) Matches(query string) bool {
 var engine Engine
 
 type SearchResults struct {
+	Previous, Offset, Next, Total int
+
 	Listings       []Listing
 	Categories     map[Category]int
 	ChangeCategory bool
+
 	Common
 }
 
@@ -71,8 +100,16 @@ func SearchListings(s *Subject, c context.Context, r *http.Request) (Template, e
 		return nil, err
 	}
 
+	off, _ := strconv.ParseInt(r.FormValue("offset"), 10, 64)
+	previous, offset, next := Paginate(results, int(off))
+
 	page := SearchResults{
-		Listings:   results,
+		Previous: previous,
+		Offset:   offset,
+		Next:     next,
+		Total:    len(results),
+
+		Listings:   results[offset:next],
 		Categories: cats,
 		Common:     com,
 	}
