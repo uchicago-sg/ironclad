@@ -79,6 +79,7 @@ func New() http.Handler {
 	mux.Handle("/create", Handler(CreateListing))
 	mux.Handle("/login", Handler(LoginPage))
 	mux.Handle("/logout", Handler(LogoutPage))
+	mux.Handle("/saml-callback", Handler(SAMLRedirect))
 	mux.Handle("/static/", http.FileServer(staticAssets()))
 	return mux
 }

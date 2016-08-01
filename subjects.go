@@ -73,7 +73,7 @@ func (s *Subject) Serialize(c context.Context) (string, error) {
 
 func newSubject(name, email string) *Subject {
 	return &Subject{
-		Name: email,
+		Name: name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(7 * 24 * time.Hour).Unix(),
 			Subject:   email,

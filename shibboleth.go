@@ -67,18 +67,25 @@ func conf(c context.Context, key string) []byte {
 	return b
 }
 
-func MustLoadSAMLConfig(c context.Context) *SAMLConfig {
-	s := &SAMLConfig{}
+func initSAML(c context.Context) {
+	samlOnce.Do(func() {
+		s := &SAMLConfig{}
 
-	if err := s.TrustCertificate(conf(c, "uchicago.crt")); err != nil {
-		panic(err)
+		if err := s.TrustCertificate(conf(c, "uchicago.crt")); err != nil {
+			panic(err)
+		}
+
+		if err := s.Use(conf(c, "marketplace.crt"), conf(c, "marketplace.key")); err != nil {
+			panic(err)
+		}
+
+		samlProvider.IDPCertificateStore = s
+		samlProvider.SPKeyStore = s
+	})
+
+	if samlProvider.IDPCertificateStore == nil {
+		panic("no SAML IDP :(")
 	}
-
-	if err := s.Use(conf(c, "marketplace.crt"), conf(c, "marketplace.key")); err != nil {
-		panic(err)
-	}
-
-	return s
 }
 
 func (s SAMLConfig) GetKeyPair() (*rsa.PrivateKey, []byte, error) {
@@ -109,15 +116,10 @@ func (l LoginResult) NewURL() string {
 }
 
 func LoginPage(s *Subject, c context.Context, r *http.Request) (Template, error) {
+	initSAML(c)
+
 	email := r.FormValue("email")
 	shib := strings.HasSuffix(email, "@uchicago.edu")
-
-	// lazily initialize the SAML provider
-	samlOnce.Do(func() {
-		config := MustLoadSAMLConfig(c)
-		samlProvider.IDPCertificateStore = config
-		samlProvider.SPKeyStore = config
-	})
 
 	if !shib {
 		s = newSubject(email, email)
@@ -125,6 +127,25 @@ func LoginPage(s *Subject, c context.Context, r *http.Request) (Template, error)
 
 	return &LoginResult{
 		NeedsShib:  shib,
+		NewSubject: s,
+	}, nil
+}
+
+func SAMLRedirect(s *Subject, c context.Context, r *http.Request) (Template, error) {
+	initSAML(c)
+
+	info, err := samlProvider.RetrieveAssertionInfo(r.FormValue("SAMLResponse"))
+	if err != nil {
+		return nil, err
+	}
+
+	// extract name and email from request
+	displayName := string(info.Values["urn:oid:2.16.840.1.113730.3.1.241"].Values[0])
+	mail := string(info.Values["urn:oid:0.9.2342.19200300.100.1.3"].Values[0])
+
+	s = newSubject(displayName, mail)
+
+	return &LoginResult{
 		NewSubject: s,
 	}, nil
 }
