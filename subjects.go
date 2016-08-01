@@ -71,6 +71,17 @@ func (s *Subject) Serialize(c context.Context) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, s).SignedString(hmacSecret)
 }
 
+func (s *Subject) CanEdit(l *Listing) bool {
+	if s == nil {
+		return false
+	}
+	return l.Seller == s.Subject
+}
+
+func (s *Subject) CanCreate() bool {
+	return s != nil
+}
+
 func newSubject(name, email string) *Subject {
 	return &Subject{
 		Name: name,

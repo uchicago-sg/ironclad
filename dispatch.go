@@ -50,6 +50,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "session",
 		Value: ss,
+		Path:  "/",
 	})
 
 	// possibly redirect somewhere else

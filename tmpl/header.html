@@ -11,7 +11,7 @@
   <h1>Marketplace</h1>
   <div class="controls" style="margin-bottom:0.5em">
     <div class="btn-group">
-      {{if .Subject}}
+      {{if .Subject.CanCreate}}
       <button type="button" class="btn btn-success dropdown-toggle"
          data-toggle="dropdown">Create Listing <span class="caret"></span>
       </button>
@@ -26,7 +26,8 @@
         </li>
         {{end}}
       </ul>
-      {{else}}
+      {{end}}
+      {{if not .Subject}}
       <button type="button" class="btn btn-warning dropdown-toggle"
          data-toggle="dropdown">Login <span class="caret"></span>
       </button>

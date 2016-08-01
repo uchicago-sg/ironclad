@@ -46,8 +46,10 @@
       <span class="label label-default">{{.Category}}</span>
     </h2>
     <p>posted by {{.Seller}}</p>
+    {{if $.Common.Subject.CanEdit .}}
     <a href="/edit/{{.ID}}{{$.Common.URLSuffix}}"
        class="btn btn-default">Edit Listing</a>
+    {{end}}
     <p style="white-space:pre-wrap">{{.Body}}</p>
   {{end}}
 {{else}}

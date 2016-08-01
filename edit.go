@@ -1,6 +1,7 @@
 package ironclad
 
 import (
+	"errors"
 	"net/http"
 
 	"golang.org/x/net/context"
@@ -13,6 +14,8 @@ type SingleListing struct {
 	Err      error
 	Common
 }
+
+var AccessDenied = errors.New("access denied")
 
 func (e SingleListing) Template() string { return "SingleListing.html" }
 func (e SingleListing) NewURL() string {
@@ -45,6 +48,10 @@ func EditListing(s *Subject, c context.Context, r *http.Request) (Template, erro
 		return nil, err
 	}
 
+	if !s.CanEdit(listing) {
+		return nil, AccessDenied
+	}
+
 	resp := SingleListing{
 		Edit:    true,
 		Listing: listing,
@@ -69,8 +76,12 @@ func EditListing(s *Subject, c context.Context, r *http.Request) (Template, erro
 }
 
 func CreateListing(s *Subject, c context.Context, r *http.Request) (Template, error) {
+	if !s.CanCreate() {
+		return nil, AccessDenied
+	}
+
 	listing := &Listing{
-		Seller:   "bob@uchicago.edu",
+		Seller:   s.Subject,
 		Category: ParseCategory(r.FormValue("category")),
 		Seeking:  r.FormValue("seeking") != "",
 	}

@@ -1,3 +1,4 @@
+{{if and (lt .Previous .Offset) (lt .Next .Total)}}
 <tr>
   <td colspan="5" style="text-align:center">
     {{if lt .Previous .Offset}}
@@ -11,3 +12,4 @@
     {{end}}
   </td>
 </tr>
+{{end}}
