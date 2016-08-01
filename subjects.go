@@ -15,15 +15,27 @@ var (
 	hmacOnce   sync.Once
 )
 
+func initHmac(c context.Context) {
+	hmacOnce.Do(func() {
+		s, err := getConfig(c, "jwt-hmac.key")
+		if err != nil {
+			panic(err)
+		}
+		hmacSecret = s
+	})
+
+	if len(hmacSecret) < 32 {
+		panic(fmt.Sprintf("hmac secret is only %d bits", len(hmacSecret)*8))
+	}
+}
+
 type Subject struct {
 	Name string `json:"cn"`
 	jwt.StandardClaims
 }
 
 func ParseSubject(c context.Context, tokenString string) (*Subject, error) {
-	hmacOnce.Do(func() {
-		hmacSecret = sharedSecret(c)
-	})
+	initHmac(c)
 
 	if tokenString == "" {
 		return nil, nil
@@ -50,9 +62,7 @@ func ParseSubject(c context.Context, tokenString string) (*Subject, error) {
 }
 
 func (s *Subject) Serialize(c context.Context) (string, error) {
-	hmacOnce.Do(func() {
-		hmacSecret = sharedSecret(c)
-	})
+	initHmac(c)
 
 	if s == nil {
 		return "", nil

@@ -5,12 +5,17 @@ package ironclad
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
+	"os"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
+
+	_ "google.golang.org/appengine/remote_api" // enable remote_api
 )
 
 // accessing data
@@ -81,26 +86,34 @@ func init() {
 	http.Handle("/", New())
 }
 
-type Secret struct {
+type Config struct {
 	Value []byte
 }
 
-func sharedSecret(c context.Context) []byte {
-	s := Secret{}
-	k := datastore.NewKey(c, "Secret", "secret", 0, nil)
+func getConfig(c context.Context, key string) ([]byte, error) {
+	s := Config{}
+	k := datastore.NewKey(c, "Config", key, 0, nil)
 	err := datastore.Get(c, k, &s)
-
-	if err == datastore.ErrNoSuchEntity {
-		s.Value = make([]byte, 32)
-		if _, err := rand.Read(s.Value); err != nil {
-			panic(err)
-		}
-		if _, err := datastore.Put(c, k, &s); err != nil {
-			panic(err)
-		}
-	} else if err != nil {
-		panic(err)
+	if err != nil {
+		err = fmt.Errorf("%s: %s", key, err)
 	}
 
-	return s.Value
+	// allow local development via files
+	if appengine.IsDevAppServer() && err != nil {
+		b, err := ioutil.ReadFile("config/" + key)
+		if os.IsNotExist(err) && key == "jwt-hmac.key" {
+			b = make([]byte, 32)
+			_, err = rand.Read(b)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if _, err := datastore.Put(c, k, &Config{b}); err != nil {
+			return nil, err
+		}
+		return b, err
+	}
+
+	return s.Value, err
 }

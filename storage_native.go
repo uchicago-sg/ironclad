@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -115,10 +116,15 @@ func scan(c context.Context) ([]Listing, error) {
 	return memoryStorage.Listings, nil
 }
 
-func sharedSecret(c context.Context) (b []byte) {
-	b = make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
+type Config struct {
+	Value []byte
+}
+
+func getConfig(c context.Context, key string) (b []byte, err error) {
+	b, err = ioutil.ReadFile("config/" + key)
+	if os.IsNotExist(err) && key == "jwt-hmac.key" {
+		b = make([]byte, 32)
+		_, err = rand.Read(b)
 	}
 	return
 }
